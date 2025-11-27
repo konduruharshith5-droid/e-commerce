@@ -1,0 +1,60 @@
+{% extends 'basic.html' %} {% block title %} {{prod.product_name}} 
+{% endblock %} {% block body %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="row">
+        <img src="/media/{{prod.image}}" alt=">>>>>">
+      </div>
+      <div class="col">
+        <div class="btn btn-outline-primary mx-3 mt-2">Buy Now</div>
+        <div class="btn btn-outline-primary mx-3 mt-2">Add To Cart</div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <h1>{{prod.product_name}}</h1>
+      <p><span>RS.</span>{{prod.price}}</p>
+      <p>{{prod.desc}}</p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  if (localStorage.getItem('cart') == null){
+    var cart = {};
+    document.getElementById("popCard").setAttribute("data-bs-content", "add items to cart");
+  } else {
+    cart = JSON.parse(localStorage.getItem('cart'));
+    document.querySelector(".count").innerText = Object.keys(cart).length;
+    document.getElementById("popCard").setAttribute("data-bs-content", "<h5>Hello</h5>");
+  }
+
+  document.querySelectorAll(".cart").forEach(btn => {
+    btn.addEventListener("click", function() {
+      var idstr = this.id.toString();
+      if (cart[idstr] != undefined) {
+        cart[idstr] += 1
+      }else {
+        cart[idstr] = 1
+      }
+      localStorage.setItem('cart', JSON.stringify(cart));
+    });
+  });
+
+  
+  const exampleEl = document.getElementById('popCard');
+
+  const popover = new bootstrap.Popover(exampleEl, {
+    trigger: 'hover',
+    placement: 'bottom',
+    fallbackPlacements: [],
+  });
+
+</script>
+
+{% endblock %}

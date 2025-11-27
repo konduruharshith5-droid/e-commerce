@@ -1,0 +1,101 @@
+{% extends 'basic.html' %} {% block title %} checkout page {% endblock %} 
+{% block body %}
+
+<div class="container col-md-6">
+  <h2 class="my-4">step-1: My Cart Checkout - review your cart items</h2>
+  <div class="items">
+    <ol class="list-group list-group-numbered">
+    </ol>
+  </div>
+
+  <h2 class="my-4">step-2: Enter address and other details</h2>
+  <form class="row g-3" action="/checkout/" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="itemjson" id="itemjson">
+    <input type="hidden" name="amount" id="amount">
+    <div class="col-md-6 my-4">
+      <label for="name" class="form-label">Name</label>
+      <input type="text" class="form-control" name="name" id="name" />
+    </div>
+    <div class="col-md-6">
+      <label for="email" class="form-label">Email</label>
+      <input type="email" class="form-control" name="email" id="email" />
+    </div>
+    <div class="col-12">
+      <label for="address" class="form-label">Address</label>
+      <input
+        type="text"
+        class="form-control"
+        id="address"
+        placeholder="1234 Main St"
+        name="address"
+      />
+    </div>
+    <div class="col-12">
+      <label for="inputAddress2" class="form-label">Address 2</label>
+      <input
+        type="text"
+        class="form-control"
+        id="inputAddress2"
+        placeholder="Apartment, studio, or floor"
+      />
+    </div>
+    <div class="col-md-6">
+      <label for="city" class="form-label">City</label>
+      <input type="text" class="form-control" name="city" id="city" />
+    </div>
+    <div class="col-md-4">
+      <label for="state" class="form-label">State</label>
+      <select id="state" name="state" class="form-select">
+        <option selected>Choose...</option>
+        <option>...</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label for="zip" class="form-label">Zip</label>
+      <input type="text" class="form-control" name="zip" id="zip" />
+    </div>
+    <div class="col-md-12 my-4">
+      <label for="phone" class="form-label">Phone</label>
+      <input type="tel" class="form-control" name="phone" id="phone" />
+    </div>
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">Place Order</button>
+    </div>
+  </form>
+</div>
+{% endblock%}
+
+{% block script %}
+
+<script>
+if (localStorage.getItem('cart') == null){
+    var cart = {};
+    document.getElementById("popCard").setAttribute("data-bs-content", "add items to cart");
+  } else {
+    cart = JSON.parse(localStorage.getItem('cart'));
+    document.querySelector(".count").innerText = Object.keys(cart).length;
+    document.getElementById("popCard").setAttribute("data-bs-content", "<h5>Hello</h5>");
+  }
+
+  console.log(cart)
+
+  for (var item in cart) {
+    let name = cart[item][1];
+    let qty = cart[item][0];
+    mystr = `
+      <li
+        class="list-group-item d-flex justify-content-between align-items-start"
+      >
+        <div class="ms-2 me-auto">
+          <div class="fw-bold">${name}</div>
+        </div>
+        <span class="badge text-bg-primary rounded-pill">${qty}</span>
+      </li>`
+
+      document.querySelector('.list-group').insertAdjacentHTML("beforeend" ,mystr);
+  }
+
+</script>
+
+{% endblock %}

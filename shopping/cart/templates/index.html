@@ -1,0 +1,192 @@
+{% extends 'basic.html' %} {% block title %} Home Page {% endblock %} {% block style %}
+<style>
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    background-color: blue;
+  }
+
+  body .small-card {
+    max-width: 250px;
+    margin: 0 auto;
+  }
+
+  .col {
+    flex: 0 0 auto;
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: 50%;
+}
+</style>
+
+{% endblock %} {% block body%}
+<!-- CARD CAROUSEL -->
+{% load static %}
+{% for nslides,range,product in prod_row %} 
+<div
+  id="cardCarousel{{forloop.counter}}"
+  class="carousel slide mt-4"
+  data-bs-ride="carousel"
+  data-bs-wrap="false"
+>
+<h1 style="margin:0 9rem;">{{product.0.category}}</h1> 
+  <div class="carousel-inner">
+    <!-- SLIDE 1 -->
+    <div class="carousel-item active"> 
+        <div class="container d-flex justify-content-center my-4">
+          {% for i in product|slice:":" %}
+          <!-- CARD 1 -->
+          <div class="col">
+            <div class="card h-100 small-card">
+              <img
+                src='media/{{i.image}}'
+                class="card-img-top img-fluid"
+                alt="{{i.product_name}}"
+                style="object-fit: cover;"
+              />
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title" id="namepr{{i.id}}">{{i.product_name}}</h5>
+                <p class="card-text">
+                  {{i.desc}}.
+                </p>
+                <div class="button d-flex gap-1">
+                  <span id="divpr{{i.id}}" class="divpr">
+                  <button id='pr{{i.id}}' class="btn btn-primary mt-auto cart">Add Cart</button>
+                  </span>
+                  <a href="/products/{{i.id}}"><button id='qv{{i.id}}' class="btn btn-primary mt-auto cart">quick view</button></a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% if forloop.counter|divisibleby:4 and forloop.counter > 0 and not forloop.last %}
+          </div></div><div class="carousel-item"><div class="container d-flex justify-content-center my-4">
+          {% endif %}
+          {% endfor %}
+        </div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <button
+    class="carousel-control-prev"
+    type="button"
+    data-bs-target="#cardCarousel{{forloop.counter}}"
+    data-bs-slide="prev"
+  >
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+
+  <button
+    class="carousel-control-next"
+    type="button"
+    data-bs-target="#cardCarousel{{forloop.counter}}"
+    data-bs-slide="next"
+  >
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+
+{% endfor %}
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  if (localStorage.getItem('cart') == null){
+    var cart = {};
+    document.getElementById("popCard").setAttribute("data-bs-content", "add items to cart");
+  } else {
+    cart = JSON.parse(localStorage.getItem('cart'));
+    document.querySelector(".count").innerText = Object.keys(cart).length;
+    document.getElementById("popCard").setAttribute("data-bs-content", "<h5>Hello</h5>");
+  }
+
+  document.querySelectorAll(".cart").forEach(btn => {
+    btn.addEventListener("click", function() {
+      var idstr = this.id.toString();
+      if (cart[idstr][0] != undefined) {
+        qty = cart[idstr][0] + 1;
+        cart[idstr] = [qty, name];
+      }else {
+        qty = 1;
+        name = document.getElementById('name' + idstr).innerHTML;
+        cart[idstr] = [qty, name];
+      }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updatecart(cart);
+    });
+  });
+
+  
+  const exampleEl = document.getElementById('popCard');
+  const popover = new bootstrap.Popover(exampleEl, {
+    trigger: 'hover',
+    placement: 'bottom',
+    fallbackPlacements: [],
+  });
+
+  updatepopover(cart)
+  function updatepopover(cart) {
+    var popstr = "";
+    popstr = popstr + "<h5> Cart for your items in my shopping cart </h5>";
+    var i = 1;
+    for (var item in cart) {
+      popstr = popstr + "<b>" + i +"</b>";
+      popstr = popstr + document.getElementById('name' + item).innerHTML + "qty: " + cart[item][0] + '<br>';
+      i = i + 1
+    }
+
+    popstr = popstr + " <a href='/checkout'><button class='btn btn-primary' id='checkout'>Checkout</button></a> <button class='btn btn-primary' id='clearCart' onclick = 'clearcart()'>Clear Cart</button>"
+
+    document.getElementById("popCard").setAttribute("data-bs-content", popstr);
+    const exampleEl = document.getElementById('popCard');
+    const popover = new bootstrap.Popover(exampleEl, {
+      trigger: 'click',
+      placement: 'bottom',
+      fallbackPlacements: [],
+    });
+  }
+
+  function clearcart() {
+    cart = JSON.parse(localStorage.getItem('cart'));
+   for (var item in cart) {
+    document.getElementById('div' + item).innerHTML = '<button id="'+ item +'" class="btn btn-primary mt-auto cart">Add Cart</button>'
+   } 
+   localStorage.clear();
+   cart = {}
+   updatecart(cart)
+  }
+
+  function updatecart(cart) {
+    for (var item in cart) {
+      document.getElementById('div' + item ).innerHTML = "<button id='minus" + item + "'class = 'btn btn-primary minus'>-</button> <span id='val" + item + "'>" + cart[item][0] + "</span> <button id = 'plus" + item + "'class='btn btn-primary plus'> + </button>"; 
+    }
+  }
+
+  document.querySelectorAll(".divpr").forEach(btn => { btn.addEventListener("click", function(e) {
+    if (e.target.matches("button.minus")) {
+      a = this.id.slice(3,);
+      cart[a][0] -= 1
+      document.querySelector(".count").innerText = cart[a][0];
+      updatecart(cart)
+    }
+
+    if (e.target.matches("button.plus")) {
+      a = this.id.slice(3,);
+      cart[a][0] += 1
+      document.querySelector(".count").innerText = cart[a][0];
+      updatecart(cart)
+    }
+
+    });
+  });
+
+
+
+</script>
+
+{% endblock %}

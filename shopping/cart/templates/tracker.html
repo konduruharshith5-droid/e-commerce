@@ -1,0 +1,31 @@
+{% extends 'basic.html' %}
+
+{% block title %} tracker {% endblock %}
+
+{% block body %}
+
+<div class="container col-md-6">
+  <h2 class="my-4">My Cart Tracker - Track your cart items</h2>
+    <form class="row my-4 g-3" id = 'trackerform' action="#" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="itemjson" id="itemjson">
+    <div class="col-md-6 my-4">
+      <label for="name" class="form-label">order_id</label>
+      <input type="text" class="form-control" name="orderid" id="orderid" />
+    </div>
+    <div class="col-md-6">
+      <label for="email" class="form-label">Email</label>
+      <input type="email" class="form-control" name="email" id="email" />
+    </div>
+    <button type="submit" class="btn btn-primary">Place Order</button>
+    </form>
+</div>
+{% endblock%}
+
+{% block script %}
+
+<script>
+
+</script>
+
+{% endblock %}
