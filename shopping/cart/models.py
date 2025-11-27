@@ -47,4 +47,3 @@ class updateorders(models.Model):
 
     def __str__(self):
         return self.update_desc[0:7] + "..."
-

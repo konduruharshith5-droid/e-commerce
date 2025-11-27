@@ -3,6 +3,9 @@ from django.http import HttpResponse
 from .models import product,Contact,orders
 from math import ceil
 import json
+from django.views.decorators.csrf import csrf_exempt
+from .paytm import checksum
+MERCHANT_KEY = 'kbzk1DSbJiV_O3p5';
 
 # Create your views here.
 
@@ -78,4 +81,37 @@ def checkout(request):
         updateorder.save()
         order.save()
 
+        param_dict = {
+            'MID':'WorldP64425807474247',
+            'ORDER_ID':str(order.order_id),
+            'TXN_AMOUNT':str(amount),
+            'CUST_ID':email,
+            'INDUSTRY_TYPE_ID':'Retail',
+            'WEBSITE':'WEBSTAGING',
+            'CHANNEL_ID':'WEB',
+	        'CALLBACK_URL':'http://127.0.0.1:8000/handlerequest/',
+        }
+
+        param_dict['CHECKSUMHASH'] = checksum.generate_checksum(param_dict, MERCHANT_KEY)
+
+        return render(request, 'paytm.html', {'param_dict':param_dict})
+
     return render(request,'checkout.html')
+
+@csrf_exempt
+def handlerequest(request):
+    form = request.POST
+    response_dict = {}
+    for i in form.keys():
+        response_dict[i] = form[i]
+        if i == 'CHECKSUMHASH':
+            checksum = form[i]
+
+    verify = checksum.verify_checksum(response_dict, MERCHANT_KEY, checksum)
+    if verify:
+        if response_dict['RESPCODE'] == '01':
+            print('Order sucessful')
+        else:
+            print('order unsucessful')
+
+    return render(request, 'paymentstatus.html', {'response': response_dict})
